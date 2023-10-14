@@ -1,51 +1,86 @@
-# Copyright (c) Streamlit Inc. (2018-2022) Snowflake Inc. (2022)
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+# Import required libraries
 import streamlit as st
-from streamlit.logger import get_logger
+import pandas as pd
+import io
+import base64
+import matplotlib.pyplot as plt
 
-LOGGER = get_logger(__name__)
+# Function to download data as an excel file
+def get_table_download_link(df):
+    towrite = io.BytesIO()
+    downloaded_file = df.to_excel(towrite, encoding='utf-8', index=False, header=True)
+    towrite.seek(0)
+    b64 = base64.b64encode(towrite.read()).decode()
+    return f'<a href="data:application/octet-stream;base64,{b64}" download="results.xlsx">Download results as Excel</a>'
 
+st.title('Dropshipping Cost Analysis')
 
-def run():
-    st.set_page_config(
-        page_title="Hello",
-        page_icon="👋",
-    )
+# Sidebar for user inputs
+with st.sidebar:
+    # Input boxes for product name and AliExpress URL
+    product_name = st.text_input('Product Name', 'Enter product name here...')
+    aliexpress_url = st.text_input('AliExpress URL', 'Enter URL here...')
+    
+    # Sliders for other inputs
+    product_cost = st.slider('Product Cost', 0.0, 50.0, 10.0, 0.5)
+    shipping_cost = st.slider('Shipping Cost', 0.0, 50.0, 5.0, 0.5)
+    facebook_marketing = st.slider('Facebook Marketing Spend (Total)', 0.0, 1000.0, 100.0, 10.0)
+    tiktok_marketing = st.slider('TikTok Marketing Spend (Total)', 0.0, 1000.0, 100.0, 10.0)
+    google_ads_marketing = st.slider('Google Ads Marketing Spend (Total)', 0.0, 1000.0, 100.0, 10.0)
+    other_costs = st.slider('Other Costs per Sale', 0.0, 50.0, 2.0, 0.5)
+    selling_price = st.slider('Selling Price', 10.0, 100.0, 30.0, 0.5)
 
-    st.write("# Welcome to Streamlit! 👋")
+# Calculations
+total_marketing_spend = facebook_marketing + tiktok_marketing + google_ads_marketing
+marketing_spend_per_sale = total_marketing_spend / (selling_price - product_cost - shipping_cost)
+gross_profit = selling_price - (product_cost + shipping_cost)
+net_profit = gross_profit - (marketing_spend_per_sale + other_costs)
+break_even_sales = marketing_spend_per_sale / gross_profit
+required_sales_for_500_profit = 500 / net_profit
+required_sales_for_1000_profit = 1000 / net_profit
+required_sales_for_2500_profit = 2500 / net_profit
 
-    st.sidebar.success("Select a demo above.")
+# Split the main screen area into 1/3 and 2/3 portions for graph and results respectively.
+col1, col2 = st.columns((5, 5))
 
-    st.markdown(
-        """
-        Streamlit is an open-source app framework built specifically for
-        Machine Learning and Data Science projects.
-        **👈 Select a demo from the sidebar** to see some examples
-        of what Streamlit can do!
-        ### Want to learn more?
-        - Check out [streamlit.io](https://streamlit.io)
-        - Jump into our [documentation](https://docs.streamlit.io)
-        - Ask a question in our [community
-          forums](https://discuss.streamlit.io)
-        ### See more complex demos
-        - Use a neural net to [analyze the Udacity Self-driving Car Image
-          Dataset](https://github.com/streamlit/demo-self-driving)
-        - Explore a [New York City rideshare dataset](https://github.com/streamlit/demo-uber-nyc-pickups)
-    """
-    )
+# Display the line graph in the first column (left side)
+with col1:
+    # Line Graph for Income vs Expenditure
+    expenditure_values = [product_cost, shipping_cost, marketing_spend_per_sale, other_costs]
+    income_values = [selling_price] * 4
+    labels = ['Product', 'Shipping', 'Marketing', 'Other']
+    fig, ax = plt.subplots(figsize=(8,6))
+    ax.plot(labels, income_values, label='Income', color='green', marker='o')
+    ax.plot(labels, expenditure_values, label='Expenditure', color='red', marker='o')
+    ax.set_title('Income vs Expenditure per Sale')
+    ax.set_ylabel('Amount ($)')
+    ax.legend()
+    st.pyplot(fig)
 
+# Display the results in the second column (right side)
+with col2:
+    st.subheader('Results')
+    st.write(f'Product Name: {product_name}')
+    st.write(f'AliExpress URL: {aliexpress_url}')
+    st.write(f'Gross Profit per Sale: ${gross_profit:.2f}')
+    st.write(f'Net Profit per Sale: ${net_profit:.2f}')
+    st.write(f'Break-Even Sales: {break_even_sales:.2f} sales to break even on marketing costs')
+    st.write(f'Required Sales for $500 Profit: {required_sales_for_500_profit:.0f} sales')
+    st.write(f'Required Sales for $1000 Profit: {required_sales_for_1000_profit:.0f} sales')
+    st.write(f'Required Sales for $2500 Profit: {required_sales_for_2500_profit:.0f} sales')
 
-if __name__ == "__main__":
-    run()
+    # Create dataframe for results
+    data = {
+        'Product Name': [product_name],
+        'AliExpress URL': [aliexpress_url],
+        'Gross Profit per Sale': [gross_profit],
+        'Net Profit per Sale': [net_profit],
+        'Break-Even Sales': [break_even_sales],
+        'Required Sales for $500 Profit': [required_sales_for_500_profit],
+        'Required Sales for $1000 Profit': [required_sales_for_1000_profit],
+        'Required Sales for $2500 Profit': [required_sales_for_2500_profit]
+    }
+    df = pd.DataFrame(data)
+    
+    # Download results as excel file
+    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
