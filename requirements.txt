@@ -1,6 +1,7 @@
 altair
 numpy
-pandas
+pandas==2.1.0
 pydeck
 streamlit
 matplotlib
+openpyxl
