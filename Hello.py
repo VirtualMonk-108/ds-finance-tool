@@ -6,12 +6,12 @@ import base64
 import matplotlib.pyplot as plt
 
 # Function to download data as an excel file
-def get_table_download_link(df):
-    towrite = io.BytesIO()
-    downloaded_file = df.to_excel(towrite, encoding='utf-8', index=False, header=True)
-    towrite.seek(0)
-    b64 = base64.b64encode(towrite.read()).decode()
-    return f'<a href="data:application/octet-stream;base64,{b64}" download="results.xlsx">Download results as Excel</a>'
+# def get_table_download_link(df):
+#     towrite = io.BytesIO()
+#     downloaded_file = df.to_excel(towrite, encoding='utf-8', index=False, header=True)
+#     towrite.seek(0)
+#     b64 = base64.b64encode(towrite.read()).decode()
+#     return f'<a href="data:application/octet-stream;base64,{b64}" download="results.xlsx">Download results as Excel</a>'
 
 st.title('Dropshipping Cost Analysis')
 
@@ -45,17 +45,20 @@ col1, col2 = st.columns((5, 5))
 
 # Display the line graph in the first column (left side)
 with col1:
-    # Line Graph for Income vs Expenditure
-    expenditure_values = [product_cost, shipping_cost, marketing_spend_per_sale, other_costs]
-    income_values = [selling_price] * 4
-    labels = ['Product', 'Shipping', 'Marketing', 'Other']
+    # Bar Graph for Income vs Total Expenditure
+    total_expenditure_per_sale = product_cost + shipping_cost + marketing_spend_per_sale + other_costs
+    values = [selling_price, total_expenditure_per_sale]
+    labels = ['Income', 'Expenditure']
     fig, ax = plt.subplots(figsize=(8,6))
-    ax.plot(labels, income_values, label='Income', color='green', marker='o')
-    ax.plot(labels, expenditure_values, label='Expenditure', color='red', marker='o')
-    ax.set_title('Income vs Expenditure per Sale')
+
+    # Plotting the bars
+    ax.bar(labels, values, color=['green', 'red'])
+
+    # Labeling and displaying the graph
+    ax.set_title('Income vs Total Expenditure per Sale')
     ax.set_ylabel('Amount ($)')
-    ax.legend()
     st.pyplot(fig)
+
 
 # Display the results in the second column (right side)
 with col2:
@@ -82,5 +85,5 @@ with col2:
     }
     df = pd.DataFrame(data)
     
-    # Download results as excel file
-    st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+    # # Download results as excel file
+    # st.markdown(get_table_download_link(df), unsafe_allow_html=True)
