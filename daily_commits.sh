@@ -144,7 +144,7 @@ end_date="2025-07-17"
 
 total_commits=0
 
-while [[ "$current_date" <= "$end_date" ]]; do
+while [[ "$current_date" < "$end_date" ]] || [[ "$current_date" == "$end_date" ]]; do
     # Get day of week (0=Sunday, 6=Saturday)
     day_of_week=$(date -j -f "%Y-%m-%d" "$current_date" "+%w" 2>/dev/null || date -d "$current_date" "+%w")
     
