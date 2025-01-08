@@ -6,7 +6,7 @@ from git import Repo
 # Configuration
 REPO_PATH = os.getcwd()  # Automatically sets the current directory
 COMMITS_PER_DAY = 2  # Number of commits per day
-START_DATE = datetime(2024, 1, 1)  # Start date (January 1st, 2024)
+START_DATE = datetime(2023, 5, 1)  # Start date (January 1st, 2024)
 END_DATE = datetime(2024, 7, 15)  # End date (July 15th, 2024)
 
 # Initialize the repo
