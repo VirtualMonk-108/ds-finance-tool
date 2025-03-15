@@ -88,3 +88,4 @@ with col2:
     # # Download results as excel file
     # st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 # Enhancement 2
+# Enhancement 6
