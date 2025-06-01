@@ -6,3 +6,4 @@ streamlit
 matplotlib
 openpyxl# Requirement update 3
 # Requirement update 7
+# Requirement update 11
