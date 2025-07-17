@@ -4,4 +4,6 @@ pandas==2.1.0
 pydeck
 streamlit
 matplotlib
-openpyxl
+openpyxl# Requirement update 3
+# Requirement update 7
+# Requirement update 11
